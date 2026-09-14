@@ -1,0 +1,18 @@
+# Local obsolete handoff retained for reference only; never version it as project state.
+CODEX_HANDOFF_SUMMARY.md
+
+# Secrets and local runtime data
+.env
+.env.*
+!.env.example
+*.db
+*.sqlite
+*.sqlite3
+
+# Dependencies and generated output
+node_modules/
+dist/
+coverage/
+__pycache__/
+*.py[cod]
+
