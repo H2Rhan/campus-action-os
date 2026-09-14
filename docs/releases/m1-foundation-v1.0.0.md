@@ -1,6 +1,6 @@
 # Campus Action OS M1 Foundation v1.0.0
 
-状态：IN PROGRESS（远程 CI、`main` 封板和标签尚未完成）
+状态：FINAL（远程 CI 基线已通过；本发布记录提交仍需通过 CI 后封板 `main` 和创建标签）
 
 ## 范围
 
@@ -14,7 +14,7 @@
 - TypeScript 共享包：`@campus-action-os/protocol@1.0.0`
 - Benchmark：`CampusActionBench v1`
 - 发布清单：`docs/releases/m1-foundation-v1.0.0.manifest.sha256`
-- CI：待远程运行后记录成功的 workflow run ID/链接
+- CI：run `34808501085`，[workflow run 链接](https://github.com/XuWenboooo/campus-action-os/actions/runs/34808501085)
 
 ## 验证范围
 

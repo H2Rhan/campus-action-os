@@ -50,3 +50,10 @@
 - Runbook 原文已重新读取；本地 `integration/m1-foundation` 仍为 `82ee82701e7536c5051c3ce94e82175e897f5374`，工作树干净，`origin/main` 未变。
 - `curl https://github.com/XuWenboooo/campus-action-os.git` 连接 8 秒超时；随后 `git push -u origin integration/m1-foundation` 再次在 `github.com:443` 失败。
 - 状态：BLOCKED（同一外部网络阻断持续）；没有改写任何远端历史，待后续网络恢复后继续 Gate 8–10。
+
+## M1-20260914-130900-14 — 分支推送与远程 CI
+
+- 网络恢复后，`integration/m1-foundation` 成功推送至 GitHub，远程 HEAD 为 `a0e50029bbfb9eefdc1dbaa8fa95c402d70ce366`。
+- GitHub Actions CI run `34808501085` 已完成并通过：[workflow run](https://github.com/XuWenboooo/campus-action-os/actions/runs/34808501085)。
+- `origin/main` 仍为 `95ab55526a5e69b4ab565e4113d4e604d2ccca92`；未强推、未改写历史。
+- 状态：PASS（Gate 8–9 基线）；发布记录变更需再次 CI，随后执行 `main` 封板和 `m1-foundation-v1.0.0` 标签创建。
