@@ -8,11 +8,11 @@
 
 ## 当前阶段
 
-M1 集成基线：已集成工程地基、核心协议和 CampusActionBench 开发工具，并提供共享协议入口、质量门禁和本地启动说明。正式测试集、AI 解析和业务闭环仍未实现。
+M2 文本接口检查点：已在 M1 `m1-foundation-v1.0.1` 基础上建立文本解析请求、文档相关性判断、解析响应、错误、确定性开发 mock、合成 fixtures、契约测试、E2E harness 和双负责人交接边界。真实 AI 解析、数据库、小程序业务闭环和正式实验仍未实现。
 
 ## 目录
 
-`apps/student-miniapp` 微信小程序宿主边界；`apps/admin-console` 发布/管理端边界；`services/api` 业务 API；`services/ai-parser` AI 解析服务边界；`packages/protocol` 共享协议/Schema 加载入口；`schemas/v1` 正式产品协议；`benchmark` 数据集工具与开发样例；`docs/frozen` 冻结方案原文；`docs/adr` 架构决策；`tests` 工程测试。
+`apps/student-miniapp` 微信小程序宿主边界；`apps/admin-console` 发布/管理端边界；`services/api` 业务 API；`services/ai-parser` AI 解析服务边界；`packages/protocol` 共享协议/Schema 加载入口；`schemas/v1` 正式产品协议；`schemas/interfaces/v1` M2 文本接口包装协议；`tools/integration/mock-ai-parser` 开发专用确定性 mock；`benchmark` 数据集工具与开发样例；`docs/frozen` 冻结方案原文；`docs/adr` 架构决策；`tests` 工程测试。
 
 ## 设计原则
 
@@ -33,6 +33,8 @@ py -3 -m pip install -r requirements-dev.txt
 npm run check
 npm run test
 npm run build
+npm run test:m2
+npm run dev:mock
 npm run dev:api
 ```
 
