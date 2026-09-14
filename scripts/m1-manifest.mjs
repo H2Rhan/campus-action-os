@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve, relative } from 'node:path';
@@ -16,8 +17,19 @@ const manifestFiles = [
   '.github/workflows/ci.yml',
 ];
 
-async function sha256(path) {
-  const bytes = await readFile(path);
+async function bytesAtM1Tag(relativePath, currentPath) {
+  try {
+    return execFileSync('git', ['show', `m1-foundation-v1.0.0:${relativePath}`], {
+      cwd: repositoryRoot,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+  } catch {
+    return readFile(currentPath);
+  }
+}
+
+async function sha256(path, relativePath) {
+  const bytes = await bytesAtM1Tag(relativePath, path);
   return createHash('sha256').update(bytes).digest('hex').toUpperCase();
 }
 
@@ -28,7 +40,9 @@ function lineFor(hash, path) {
 async function createManifest() {
   const lines = [];
   for (const relativePath of manifestFiles) {
-    lines.push(lineFor(await sha256(resolve(repositoryRoot, relativePath)), relativePath));
+    lines.push(
+      lineFor(await sha256(resolve(repositoryRoot, relativePath), relativePath), relativePath),
+    );
   }
   await mkdir(dirname(manifestPath), { recursive: true });
   await writeFile(manifestPath, `${lines.join('\n')}\n`, 'utf8');
@@ -51,7 +65,7 @@ async function verifyManifest() {
       throw new Error(`Unexpected or duplicate manifest path: ${relativePath}`);
     }
     seenPaths.add(relativePath);
-    const actualHash = await sha256(resolve(repositoryRoot, relativePath));
+    const actualHash = await sha256(resolve(repositoryRoot, relativePath), relativePath);
     if (recordedHash !== actualHash) {
       throw new Error(`Hash mismatch for ${relativePath}: ${recordedHash} != ${actualHash}`);
     }

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { Ajv2020, type ErrorObject, type ValidateFunction } from 'ajv/dist/2020.js';
@@ -185,11 +186,117 @@ export type RequestContext = {
   environment: 'local' | 'test' | 'demo' | 'production';
 };
 
+export type TextParseStatus = 'succeeded' | 'partial' | 'needs_confirmation' | 'rejected';
+export type ParseErrorCode =
+  | 'INVALID_REQUEST'
+  | 'TEXT_TOO_LARGE'
+  | 'UNSUPPORTED_CONTENT_TYPE'
+  | 'PROTOCOL_VERSION_UNSUPPORTED'
+  | 'PARSER_NOT_CONFIGURED'
+  | 'PARSER_TIMEOUT'
+  | 'PARSER_REJECTED'
+  | 'PARSER_RESPONSE_INVALID'
+  | 'INTERNAL_ERROR';
+
+export type TextParseDocument = {
+  document_id: string;
+  content_type: 'text/plain';
+  text: string;
+  content_sha256: string;
+  language: string;
+  timezone: string;
+};
+
+export type UserProfile = {
+  education_level?: string;
+  grade?: string;
+  college?: string;
+  major?: string;
+  campus?: string;
+  student_categories?: string[];
+  organization_memberships?: string[];
+};
+
+export type TextParseExecutionContext = {
+  environment: 'local' | 'test' | 'demo' | 'production';
+  deadline_ms: number;
+  requested_at: string;
+};
+
+export type TextParseRequest = {
+  schema_version: 'text-parse-request/v1';
+  request_id: string;
+  idempotency_key: string;
+  protocol_version: ProtocolVersion;
+  document: TextParseDocument;
+  user_profile: UserProfile;
+  execution_context: TextParseExecutionContext;
+};
+
+export type AssessmentEvidence = {
+  evidence_id: string;
+  source_text: string;
+  field_name: 'user_relevance' | 'target_population' | 'deadline' | 'conflict' | 'other';
+  span?: [number, number];
+};
+
+export type DocumentAssessment = {
+  schema_version: 'document-assessment/v1';
+  document_id: string;
+  user_relevance: Relevance;
+  relevance_reason: string;
+  evidence: AssessmentEvidence[];
+  verification_status: VerificationStatus;
+};
+
+export type ParseWarning = {
+  code: string;
+  message: string;
+  paths?: string[];
+};
+
+export type ParserMetadata = {
+  parser_version: string;
+  model_provider: string;
+  model_version: string;
+  prompt_version: string;
+  rule_version: string;
+  ocr_version: 'not_applicable';
+  started_at: string;
+  completed_at: string;
+  latency_ms: number;
+};
+
+export type DevelopmentProvenance = {
+  development_only: true;
+  synthetic: true;
+  not_model_output: true;
+};
+
+export type TextParseResponse = {
+  schema_version: 'text-parse-response/v1';
+  request_id: string;
+  document_id: string;
+  status: TextParseStatus;
+  document_assessment: DocumentAssessment;
+  verified_actions: VerifiedActionObject[];
+  action_graph: ActionGraph | null;
+  warnings: ParseWarning[];
+  parser_metadata: ParserMetadata;
+  provenance?: DevelopmentProvenance;
+};
+
 export type ApiError = {
   error: { code: string; message: string; requestId: string; retryable: boolean };
 };
 
-export type ProtocolSchemaName = 'verified-action-object' | 'action-graph' | 'campus-action-bench';
+export type ProtocolSchemaName =
+  | 'verified-action-object'
+  | 'action-graph'
+  | 'campus-action-bench'
+  | 'text-parse-request'
+  | 'document-assessment'
+  | 'text-parse-response';
 export type ValidationError = {
   path: string;
   keyword: string;
@@ -201,6 +308,9 @@ const schemaFiles: Record<ProtocolSchemaName, string> = {
   'verified-action-object': 'schemas/v1/verified-action-object.schema.json',
   'action-graph': 'schemas/v1/action-graph.schema.json',
   'campus-action-bench': 'benchmark/schema/campus-action-bench-v1.schema.json',
+  'text-parse-request': 'schemas/interfaces/v1/text-parse-request.schema.json',
+  'document-assessment': 'schemas/interfaces/v1/document-assessment.schema.json',
+  'text-parse-response': 'schemas/interfaces/v1/text-parse-response.schema.json',
 };
 const sourceRoot = resolve(fileURLToPath(new URL('.', import.meta.url)), '../../..');
 
@@ -226,6 +336,11 @@ function toValidationErrors(errors: ErrorObject[] | null | undefined): Validatio
 function makeValidator(name: ProtocolSchemaName, rootDir: string): ValidateFunction {
   const ajv = new Ajv2020({ allErrors: true, strict: false });
   addFormats(ajv);
+  if (name === 'text-parse-response') {
+    ajv.addSchema(loadSchema('verified-action-object', rootDir));
+    ajv.addSchema(loadSchema('action-graph', rootDir));
+    ajv.addSchema(loadSchema('document-assessment', rootDir));
+  }
   return ajv.compile(loadSchema(name, rootDir));
 }
 
@@ -373,6 +488,205 @@ export function validateActionGraph(
   if ([...nodeIds].some(visit))
     errors.push({ path: '/edges', keyword: 'cycle', message: 'execution dependency cycle' });
   return errors.length ? { ok: false, errors } : result;
+}
+
+function prefixedErrors(prefix: string, errors: ValidationError[]): ValidationError[] {
+  return errors.map((error) => ({
+    ...error,
+    path: `${prefix}${error.path === '/' ? '' : error.path}`,
+  }));
+}
+
+export function validateTextParseRequest(
+  value: unknown,
+  rootDir = sourceRoot,
+): ValidationResult<TextParseRequest> {
+  const result = validate<TextParseRequest>('text-parse-request', value, rootDir);
+  if (!result.ok) return result;
+  const actualHash = createHash('sha256').update(result.value.document.text, 'utf8').digest('hex');
+  if (actualHash !== result.value.document.content_sha256) {
+    return {
+      ok: false,
+      errors: [
+        {
+          path: '/document/content_sha256',
+          keyword: 'content_sha256',
+          message: 'content_sha256 does not match document.text',
+        },
+      ],
+    };
+  }
+  return result;
+}
+
+export function validateDocumentAssessment(
+  value: unknown,
+  rootDir = sourceRoot,
+): ValidationResult<DocumentAssessment> {
+  const result = validate<DocumentAssessment>('document-assessment', value, rootDir);
+  if (!result.ok) return result;
+  const errors: ValidationError[] = [];
+  if (
+    result.value.user_relevance === 'irrelevant' &&
+    result.value.verification_status !== 'passed'
+  ) {
+    errors.push({
+      path: '/verification_status',
+      keyword: 'semantic',
+      message: 'irrelevant assessment must have passed verification status',
+    });
+  }
+  if (
+    result.value.user_relevance === 'uncertain' &&
+    result.value.verification_status === 'passed'
+  ) {
+    errors.push({
+      path: '/verification_status',
+      keyword: 'semantic',
+      message: 'uncertain assessment requires explicit confirmation or conflict status',
+    });
+  }
+  return errors.length ? { ok: false, errors } : result;
+}
+
+export function validateTextParseResponse(
+  value: unknown,
+  rootDir = sourceRoot,
+): ValidationResult<TextParseResponse> {
+  const result = validate<TextParseResponse>('text-parse-response', value, rootDir);
+  if (!result.ok) return result;
+  const response = result.value;
+  const errors: ValidationError[] = [];
+  const assessment = validateDocumentAssessment(response.document_assessment, rootDir);
+  if (!assessment.ok) errors.push(...prefixedErrors('/document_assessment', assessment.errors));
+
+  for (const [index, action] of response.verified_actions.entries()) {
+    const actionResult = validateVerifiedActionObject(action, rootDir);
+    if (!actionResult.ok)
+      errors.push(...prefixedErrors(`/verified_actions/${index}`, actionResult.errors));
+    if (action.user_relevance === 'irrelevant') {
+      errors.push({
+        path: `/verified_actions/${index}/user_relevance`,
+        keyword: 'semantic',
+        message: 'irrelevant documents cannot contain an action object',
+      });
+    }
+  }
+
+  if (response.action_graph !== null) {
+    const graph = validateActionGraph(response.action_graph, rootDir);
+    if (!graph.ok) errors.push(...prefixedErrors('/action_graph', graph.errors));
+  }
+  if (response.document_assessment.document_id !== response.document_id) {
+    errors.push({
+      path: '/document_assessment/document_id',
+      keyword: 'consistency',
+      message: 'document_assessment.document_id must equal document_id',
+    });
+  }
+  if (
+    response.status === 'succeeded' &&
+    !['relevant', 'irrelevant'].includes(response.document_assessment.user_relevance)
+  ) {
+    errors.push({
+      path: '/status',
+      keyword: 'semantic',
+      message: 'succeeded response requires a relevant or irrelevant document assessment',
+    });
+  }
+  if (response.status === 'partial' && response.warnings.length === 0) {
+    errors.push({
+      path: '/warnings',
+      keyword: 'semantic',
+      message: 'partial response requires warnings',
+    });
+  }
+  if (response.status === 'needs_confirmation') {
+    const hasBasis =
+      response.document_assessment.user_relevance === 'uncertain' ||
+      response.document_assessment.verification_status !== 'passed' ||
+      response.warnings.some((warning) =>
+        /conflict|confirm|uncertain/i.test(warning.code + warning.message),
+      );
+    if (!hasBasis) {
+      errors.push({
+        path: '/status',
+        keyword: 'semantic',
+        message: 'needs_confirmation requires an uncertainty or conflict basis',
+      });
+    }
+  }
+  if (
+    response.status === 'rejected' &&
+    (response.verified_actions.length > 0 || response.action_graph !== null)
+  ) {
+    errors.push({
+      path: '/verified_actions',
+      keyword: 'semantic',
+      message: 'rejected response must not contain executable results',
+    });
+  }
+  const started = Date.parse(response.parser_metadata.started_at);
+  const completed = Date.parse(response.parser_metadata.completed_at);
+  if (Number.isFinite(started) && Number.isFinite(completed) && completed < started) {
+    errors.push({
+      path: '/parser_metadata/completed_at',
+      keyword: 'semantic',
+      message: 'completed_at must not precede started_at',
+    });
+  }
+  return errors.length ? { ok: false, errors } : result;
+}
+
+export function validateTextParseExchange(
+  request: unknown,
+  response: unknown,
+  rootDir = sourceRoot,
+): ValidationResult<{ request: TextParseRequest; response: TextParseResponse }> {
+  const requestResult = validateTextParseRequest(request, rootDir);
+  const responseResult = validateTextParseResponse(response, rootDir);
+  const errors: ValidationError[] = [];
+  if (!requestResult.ok) errors.push(...prefixedErrors('/request', requestResult.errors));
+  if (!responseResult.ok) errors.push(...prefixedErrors('/response', responseResult.errors));
+  if (errors.length > 0 || !requestResult.ok || !responseResult.ok) {
+    return { ok: false, errors };
+  }
+  if (requestResult.value.request_id !== responseResult.value.request_id) {
+    errors.push({
+      path: '/response/request_id',
+      keyword: 'consistency',
+      message: 'request_id must round-trip unchanged',
+    });
+  }
+  if (requestResult.value.document.document_id !== responseResult.value.document_id) {
+    errors.push({
+      path: '/response/document_id',
+      keyword: 'consistency',
+      message: 'document_id must round-trip unchanged',
+    });
+  }
+  if (requestResult.value.protocol_version !== protocolVersion) {
+    errors.push({
+      path: '/request/protocol_version',
+      keyword: 'consistency',
+      message: 'unsupported protocol version',
+    });
+  }
+  return errors.length
+    ? { ok: false, errors }
+    : { ok: true, value: { request: requestResult.value, response: responseResult.value } };
+}
+
+export function isRetryableParseError(code: ParseErrorCode): boolean {
+  return code === 'PARSER_TIMEOUT' || code === 'INTERNAL_ERROR';
+}
+
+export function createParseError(
+  code: ParseErrorCode,
+  message: string,
+  requestId: string,
+): ApiError {
+  return createApiError(code, message, requestId, isRetryableParseError(code));
 }
 
 export function createApiError(
