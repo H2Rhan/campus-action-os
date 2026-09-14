@@ -4,7 +4,7 @@
 
 ## 项目定位
 
-把非结构化校园通知转换为可核验、可执行、可追踪的行动；本仓库当前只承载工程基础，不代表解析能力已经上线。
+把非结构化校园通知转换为可核验、可执行、可追踪的行动；本仓库当前承载 M1 工程与协议基础，不代表 AI 解析能力已经上线。
 
 ## 当前阶段
 
@@ -42,7 +42,7 @@ API 默认监听 `http://localhost:3000`，可访问 `/health` 和 `/v1/capabili
 
 ## 质量命令
 
-`npm run format:check`、`npm run lint`、`npm run typecheck`、`npm run test`、`npm run build`、`npm run test:contracts`、`npm run test:benchmark`、`npm run benchmark:audit`、`npm run schema:check`、`npm run python:syntax`、`npm run diff:check`，或一次运行 `npm run check`。Windows 下 Python 命令由脚本自动选择 `py -3`，Unix 下选择 `python3`/`python`；CI 与 `npm run check` 保持一致。
+`npm run format:check`、`npm run lint`、`npm run typecheck`、`npm run test`、`npm run build`、`npm run test:built`、`npm run test:contracts`、`npm run test:benchmark`、`npm run benchmark:audit`、`npm run schema:check`、`npm run python:syntax`、`npm run scan:secrets`、`npm run release:manifest:verify`、`npm run diff:check`，或一次运行 `npm run check`。Windows 下 Python 命令由脚本自动选择 `py -3`，Unix 下选择 `python3`/`python`；CI 与 `npm run check` 保持一致。
 
 ## 测试层次
 
@@ -54,4 +54,4 @@ API 默认监听 `http://localhost:3000`，可访问 `/health` 和 `/v1/capabili
 
 ## 尚未实现
 
-真实通知采集、身份认证、数据库迁移、AI provider 接入、Prompt/规则编排、小程序页面、生产部署、正式 800 条数据、正式测试集冻结和正式实验均未实现。当前 Schema 是协议协作者提交的 v1 机器契约；若需改变冻结定义或核心语义，必须新建版本/proposal。
+真实通知采集、身份认证、数据库迁移、AI provider 接入、Prompt/规则编排、小程序页面、生产部署、正式 800 条数据、正式测试集冻结和正式实验均未实现。当前 `schemas/v1/` 是已验证的 v1 机器契约；若需改变冻结定义或核心语义，必须新建版本/proposal。

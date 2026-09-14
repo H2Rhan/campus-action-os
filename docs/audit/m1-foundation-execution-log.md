@@ -1,0 +1,39 @@
+# M1 Foundation 执行日志（append-only）
+
+本文件只追加记录，不删除历史失败。Run ID 在每次验证重跑时递增。
+
+## M1-20260914-124000-01 — Phase 0/1 基线
+
+- 时间：2026-09-14（Asia/Shanghai）
+- worktree：`F:\项目\腾讯小程序-m1-foundation`
+- 分支：`integration/m1-foundation`
+- 初始 `origin/main`：`95ab55526a5e69b4ab565e4113d4e604d2ccca92`
+- 初始集成 HEAD：`823d053f2f4c6badb07fc3ed899cd20c453f7bd2`
+- Node/npm/Python/Git：Node 26.2.0 / npm 11.13.0 / Python 3.12.9 / Git 2.54.0.windows.1
+- 状态：PASS；三项成果和独立 worktree 已确认。
+
+## M1-20260914-124500-02 — 冻结原文完整性
+
+- 仓库与外部原件：22520 字节，SHA-256 `F17072D340314E5C4A01B13B1D017F8ABF35ECCDF9C60D3995380FCD776E712D`
+- 状态：PASS；冻结文件以 binary 属性保存，未修改原文。
+
+## M1-20260914-125000-03 — 协议迁移局部复验
+
+- 变更：按冻结字段重建 VAO/Graph Schema、迁移 12 个开发正例、补齐运行时校验和类型。
+- 结果：contracts 初次复验从旧协议失败，随后迁移修复；最终 contracts/integration 通过。
+- 科研影响：无；未访问正式测试集，未改变冻结方案。
+
+## M1-20260914-125500-04 — 当前全量验证
+
+- `npm ci`、Node 检查、构建、Python 检查、样例审计和 diff 检查：PASS。
+- 独立 Python 3.12 虚拟环境安装 requirements 并运行 contracts/integration/Benchmark：PASS。
+- 状态：PASS（本地）；远程 CI、main 封板和标签仍待后续 Gate。
+
+## M1-20260914-130000-10 — 协议冻结对齐后的本地复验
+
+- 调整：按冻结原文重建正式 VAO/Action Graph Schema；保留 Benchmark 原生 `not_relevant` 枚举；通过可选 `gold.protocol_projection` 携带协议投影，不复制 Benchmark 规范字段。
+- `npm ci` 与 `py -3 -m pip install -r requirements-dev.txt`：PASS。
+- `npm run check`：PASS；Node 4 tests、Python contracts 53 tests、Benchmark unittest 4 tests、integration 6 tests；构建后协议加载、Schema 校验、开发样例审计、敏感扫描、manifest 校验和 diff 检查均通过。
+- 冻结原文：22520 字节，仓库副本与外部原件逐字节一致，SHA-256 `F17072D340314E5C4A01B13B1D017F8ABF35ECCDF9C60D3995380FCD776E712D`。
+- API/AI 冒烟：健康检查、能力端点、请求 ID/错误格式和 AI 未配置时 `501` 均通过；无模型密钥、无虚假解析结果。
+- 状态：PASS（本地）；远程 CI、main 封板和标签仍待后续 Gate。

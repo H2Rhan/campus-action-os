@@ -12,4 +12,4 @@
 
 `source_group` 是通知原件、转发、截图裁剪、修订和同一通知变体的稳定谱系键。所有个人信息必须使用明显虚构值或不可逆脱敏占位符（如 `STUDENT_FAKE_001`），禁止姓名、学号、手机号、身份证号、具体住址。
 
-Action Graph 的 action 至少含稳定 `action_id`、动作 `verb`、对象 `object`，并可含 deadline、地点、平台、材料、条件、例外；未知值使用 `null` 加 `unknown`/缺失记录，禁止猜测。证据使用 OCR 文本半开区间 `[text_start,text_end)`，版面证据可附 page/block/bounding box。
+Action Graph 的 action 至少含稳定 `action_id`、动作 `verb`、对象 `object`，并可含 deadline、地点、平台、材料、条件、例外；未知值使用 `null` 加 `unknown`/缺失记录，禁止猜测。协议对象如需随标准答案保存，放入 `gold.protocol_projection`，并由产品 Schema 另行验证；Benchmark 不复制协议字段。证据使用 OCR 文本半开区间 `[text_start,text_end)`，版面证据可附 page/block/bounding box。

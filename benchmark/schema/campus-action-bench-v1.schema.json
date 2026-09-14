@@ -22,6 +22,7 @@
     "user_profile":{"type":"object","required":["profile_id","attributes"],"properties":{"profile_id":{"type":"string"},"attributes":{"type":"object"}}},
     "gold":{"type":"object","required":["relevance","action_graph","field_evidence","ambiguities","conflicts","missing_information","risk_labels"],"properties":{
       "relevance":{"enum":["relevant","not_relevant","uncertain"]},
+      "protocol_projection":{"type":"object","required":["schema_version","object_kind","payload"],"properties":{"schema_version":{"enum":["verified-action-object/v1","action-graph/v1"]},"object_kind":{"enum":["verified_action_object","action_graph"]},"payload":{"type":"object","description":"Validated against the matching local schemas/v1 document by the integration test; this container does not redefine product semantics."}},"allOf":[{"if":{"properties":{"object_kind":{"const":"verified_action_object"}}},"then":{"properties":{"schema_version":{"const":"verified-action-object/v1"}}}},{"if":{"properties":{"object_kind":{"const":"action_graph"}}},"then":{"properties":{"schema_version":{"const":"action-graph/v1"}}}}],"additionalProperties":false},
       "action_graph":{"type":"object","required":["actions"],"properties":{"actions":{"type":"array"},"dependencies":{"type":"array"}}},
       "field_evidence":{"type":"array","items":{"type":"object","required":["field","text_start","text_end"]}},
       "ambiguities":{"type":"array"},"conflicts":{"type":"array"},"missing_information":{"type":"array"},"risk_labels":{"type":"array"}
