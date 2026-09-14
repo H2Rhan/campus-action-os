@@ -63,3 +63,10 @@
 - 本地发布记录提交：`480efa6`；工作树保持干净。
 - 三次 HTTPS push 均连接超时或被重置；GitHub API 可读且权威 branch ref 仍为 `a0e50029bbfb9eefdc1dbaa8fa95c402d70ce366`，未发生远端写入。
 - 状态：BLOCKED（Git smart-HTTP 通道间歇性不可达）；不执行 `main` 更新或标签创建，直到发布记录提交完成远程 CI。
+
+## M1-20260914-131900-16 — main 封板与发布标签
+
+- `integration/m1-foundation` 发布记录提交对应 CI run `34809082935` 已通过。
+- 经远端基线确认，执行非强制快进：`origin/main` 从 `95ab55526a5e69b4ab565e4113d4e604d2ccca92` 更新到 `ea3c333aa72d8e7f67a54778ad747705e3ba10b5`。
+- 检查标签不存在后创建并推送 annotated tag `m1-foundation-v1.0.0`，标签目标为 `ea3c333aa72d8e7f67a54778ad747705e3ba10b5`；未强推、未改写任何已有标签。
+- 状态：PASS（Gate 8–10 完成；远程 `main` 与 M1 发布标签已封板）。

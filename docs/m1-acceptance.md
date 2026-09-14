@@ -1,6 +1,6 @@
 # M1 集成验收记录
 
-状态：PASS（截至 2026-09-14；远程 CI run `34808501085` 已通过，main 封板和发布标签将在本次发布记录提交 CI 通过后完成）
+状态：PASS（截至 2026-09-14；远程 CI run `34809082935` 已通过，`main` 已快进封板，`m1-foundation-v1.0.0` 已创建）
 
 ## 集成内容
 
@@ -39,4 +39,4 @@ monorepo 工程配置、Node/Python 依赖入口、共享协议包、明确 Type
 
 M2 可依赖 `packages/protocol` 的协议版本、明确类型、`loadSchema`/`getSchemaPath`、`validateVerifiedActionObject`、`validateActionGraph` 和标准错误结果；服务边界为 `services/api` 与 `services/ai-parser`。Schema 字段级语义以冻结原文和已对齐的 `schemas/v1/` 为准；不能在应用层复制第二套对象。正式数据授权、认证/数据库选型、AI provider、远程 CI 和部署隔离仍是进入生产前风险。
 
-结论：满足“协议与数据冻结”到“端到端工程闭环”之间的工程进入条件，可供 M2 开发使用；不代表 M2 功能或正式实验已经完成。发布记录变更仍须通过 CI，随后才能封板 `main` 并创建标签。
+结论：满足“协议与数据冻结”到“端到端工程闭环”之间的工程进入条件，可供 M2 开发使用；不代表 M2 功能或正式实验已经完成。M1 远程 CI、`main` 封板和不可变发布标签均已完成。
