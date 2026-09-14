@@ -23,7 +23,7 @@
 - `steps` 是可执行动作，至少一个；`dependencies` 只表达步骤之间的关系。`conditions` 是至少两个结果的分支；`exceptions` 表达例外，不是普通备注。
 - `deadline.value` 使用 ISO 日期、带时区的 datetime 或 `start/end` 日期范围。未知时只能使用真正的 JSON `null` 与 `precision:"unknown"`；不得使用字符串 `"null"`、空字符串、0 或占位日期。`boundary_semantics` 为 `before`、`no_later_than`、`on`、`after` 或 `unknown`。多阶段截止应使用多个 VAO 或 Graph milestone 节点。
 - `evidence.source_text` 必须是可复核的原文片段；`page_or_image` 是页码或图像标识；`bounding_box` 使用 0 到 1 的 `[x_min,y_min,x_max,y_max]` 归一化坐标；`field_name` 限定到关键字段。OCR 缺损应保留可见文本并将相关字段标为 `unknown` 或触发 `user_confirmation_required`，不得静默修复。
-- `confidence.score` 是 (0,1]，不是概率真值；`basis` 记录模型、规则复核或用户确认来源。没有默认分数。
+- `confidence.score` 是 [0,1] 的可比较分数，不是概率真值；0 表示没有可用置信度，1 表示在当前证据范围内最高分。`basis` 记录模型、规则复核或用户确认来源。没有默认分数。
 - `epistemic_status` 的 `explicit` 只适用于证据直接表达；`rule_inferred` 必须能追溯到证据但不是原文直述；`ai_estimated` 表示模型估计；`unknown` 表示缺失。冲突和需确认使用 `verification_status`。
 - `change_history` 是追加式、不可变审计轨迹。延期、撤销、替换使用 `postponed`、`revoked`、`replaced` 事件，并在 Graph 中用 `postpones`、`revokes`、`replaces` 边。
 
