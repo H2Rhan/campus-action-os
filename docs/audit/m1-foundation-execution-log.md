@@ -44,3 +44,9 @@
 - 远程动作：三次 `git push -u origin integration/m1-foundation`（含一次 HTTP/1.1 重试）均因连接 `github.com:443` 失败；`curl` 连接测试超时。未发生远端写入。
 - 安全结论：没有使用强制推送、没有改写标签、没有更新 `main`；CI、远程 `main` 和 M1 标签因此不能声称完成。
 - 状态：BLOCKED（外部网络通道）；本地工程结果保持可复验，网络恢复后从 `2b0f829` 继续。
+
+## M1-20260914-130600-13 — 恢复后的远程通道复验
+
+- Runbook 原文已重新读取；本地 `integration/m1-foundation` 仍为 `82ee82701e7536c5051c3ce94e82175e897f5374`，工作树干净，`origin/main` 未变。
+- `curl https://github.com/XuWenboooo/campus-action-os.git` 连接 8 秒超时；随后 `git push -u origin integration/m1-foundation` 再次在 `github.com:443` 失败。
+- 状态：BLOCKED（同一外部网络阻断持续）；没有改写任何远端历史，待后续网络恢复后继续 Gate 8–10。

@@ -15,3 +15,4 @@
 补充说明：早期日志中的“58 tests”是迁移过程中的中间计数；最终本地复验为 contracts 53、integration 6、Benchmark unittest 4，均通过。
 
 | `M1-20260914-130100-12` | 推送 `integration/m1-foundation` 至 GitHub | 3 次 HTTPS 推送均在连接 `github.com:443` 时失败；`curl` 连接测试同样超时 | 当前执行环境无可用 GitHub 网络通道 | 无 | 未改写本地或远端历史；检查代理/配置后保留本地提交，待网络恢复后按原分支重试 | BLOCKED |
+| `M1-20260914-130600-13` | 恢复后的远程通道复验 | `curl` 8 秒超时，随后 HTTPS push 再次在 `github.com:443` 失败 | 外部网络通道仍不可达 | 无 | 远端状态未变；保留干净本地分支并追加证据，等待后续外部状态变化 | BLOCKED |
