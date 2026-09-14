@@ -37,8 +37,13 @@ def audit(args):
     if dup: errors.append("duplicate IDs: "+", ".join(dup))
     total=len([x for _,x in rows if "__parse_error__" not in x]); cats_report={k:{"count":v,"ratio":v/total if total else 0} for k,v in sorted(cats.items())}
     over=[k for k,v in cats_report.items() if v["ratio"]>.25]
-    if over: errors.append("category exceeds 25%: "+", ".join(over))
-    result={"ok":not errors,"total":total,"categories":cats_report,"coverage":{k:{"count":v,"ratio":v/total if total else 0} for k,v in sorted(flags.items())},"duplicate_ids":dup,"lineage_groups":len(groups),"errors":errors,"warnings":warnings}
+    if over:
+        message = "category exceeds 25%: "+", ".join(over)
+        if args.development:
+            warnings.append(message)
+        else:
+            errors.append(message)
+    result={"ok":not errors,"mode":"development" if args.development else "production","total":total,"categories":cats_report,"coverage":{k:{"count":v,"ratio":v/total if total else 0} for k,v in sorted(flags.items())},"duplicate_ids":dup,"lineage_groups":len(groups),"errors":errors,"warnings":warnings}
     if args.compare:
         seen={}
         for cp in args.compare:
@@ -97,7 +102,7 @@ def verify(args):
     print(json.dumps({"ok":not bad,"mismatches":bad},ensure_ascii=False)); return 0 if not bad else 1
 def main():
     p=argparse.ArgumentParser(); s=p.add_subparsers(dest="cmd",required=True)
-    a=s.add_parser("audit"); a.add_argument("input"); a.add_argument("--expected",action="store_true"); a.add_argument("--compare",action="append",default=[]); a.set_defaults(fn=audit)
+    a=s.add_parser("audit"); a.add_argument("input"); a.add_argument("--expected",action="store_true"); a.add_argument("--development",action="store_true"); a.add_argument("--compare",action="append",default=[]); a.set_defaults(fn=audit)
     d=s.add_parser("split"); d.add_argument("input"); d.add_argument("--out-dir",required=True); d.add_argument("--seed",type=int,required=True); d.add_argument("--stratify",default="notice_category"); d.set_defaults(fn=split)
     f=s.add_parser("freeze"); f.add_argument("test"); f.add_argument("config"); f.add_argument("version"); f.add_argument("--manifest",required=True); f.set_defaults(fn=freeze)
     v=s.add_parser("verify"); v.add_argument("manifest"); v.add_argument("test"); v.set_defaults(fn=verify)

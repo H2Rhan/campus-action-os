@@ -1,11 +1,14 @@
 import { createServer } from 'node:http';
+import { protocolVersion } from '@campus-action-os/protocol';
 const port = Number(process.env.AI_PORT ?? 3001);
 createServer((request, response) => {
   response.setHeader('content-type', 'application/json; charset=utf-8');
   if (request.url === '/health' && request.method === 'GET') {
     response
       .writeHead(200)
-      .end(JSON.stringify({ status: 'ok', service: 'ai-parser', configured: false }));
+      .end(
+        JSON.stringify({ status: 'ok', service: 'ai-parser', configured: false, protocolVersion }),
+      );
     return;
   }
   response.writeHead(501).end(
