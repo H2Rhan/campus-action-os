@@ -57,3 +57,9 @@
 - GitHub Actions CI run `34808501085` 已完成并通过：[workflow run](https://github.com/XuWenboooo/campus-action-os/actions/runs/34808501085)。
 - `origin/main` 仍为 `95ab55526a5e69b4ab565e4113d4e604d2ccca92`；未强推、未改写历史。
 - 状态：PASS（Gate 8–9 基线）；发布记录变更需再次 CI，随后执行 `main` 封板和 `m1-foundation-v1.0.0` 标签创建。
+
+## M1-20260914-131400-15 — 发布记录推送重试
+
+- 本地发布记录提交：`480efa6`；工作树保持干净。
+- 三次 HTTPS push 均连接超时或被重置；GitHub API 可读且权威 branch ref 仍为 `a0e50029bbfb9eefdc1dbaa8fa95c402d70ce366`，未发生远端写入。
+- 状态：BLOCKED（Git smart-HTTP 通道间歇性不可达）；不执行 `main` 更新或标签创建，直到发布记录提交完成远程 CI。

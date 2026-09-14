@@ -16,3 +16,4 @@
 
 | `M1-20260914-130100-12` | 推送 `integration/m1-foundation` 至 GitHub | 3 次 HTTPS 推送均在连接 `github.com:443` 时失败；`curl` 连接测试同样超时 | 当前执行环境无可用 GitHub 网络通道 | 无 | 未改写本地或远端历史；检查代理/配置后保留本地提交，待网络恢复后按原分支重试 | BLOCKED |
 | `M1-20260914-130600-13` | 恢复后的远程通道复验 | `curl` 8 秒超时，随后 HTTPS push 再次在 `github.com:443` 失败 | 外部网络通道仍不可达 | 无 | 远端状态未变；保留干净本地分支并追加证据，等待后续外部状态变化 | BLOCKED |
+| `M1-20260914-131400-15` | 发布记录提交推送 | `480efa6` 的 3 次 HTTPS push 均连接超时或被重置 | GitHub Git smart-HTTP 通道间歇性不可达 | 无 | GitHub API 仍可读，远端 branch ref 权威确认仍为 `a0e5002`；未改写历史，继续有限重试 | BLOCKED |
